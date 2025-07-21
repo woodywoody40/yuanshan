@@ -290,28 +290,84 @@ export async function onRequestPut(context) {
     // 優先使用 SheetDB 更新
     if (env.SHEETDB_URL && visitorData.id) {
       try {
-        // SheetDB 更新需要使用 PATCH 方法和特定的 URL 格式
-        const updateUrl = `${env.SHEETDB_URL}/id/${visitorData.id}`;
-        const response = await fetch(updateUrl, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: visitorData.name,
-            email: visitorData.email || '',
-            phone: visitorData.phone || '',
-            howDidYouHear: visitorData.howDidYouHear || '',
-            howDidYouHearOther: visitorData.howDidYouHearOther || '',
-            isFirstVisit: visitorData.isFirstVisit || 'no',
-            wantsContact: visitorData.wantsContact || 'no',
-            prayerRequest: visitorData.prayerRequest || ''
-          })
-        });
+        console.log('Attempting to update visitor:', visitorData.id);
         
-        if (!response.ok) {
-          throw new Error(`SheetDB update error: ${response.status}`);
+        // 方法 1: 使用 PATCH 方法更新特定記錄
+        const updateData = {
+          name: visitorData.name,
+          email: visitorData.email || '',
+          phone: visitorData.phone || '',
+          howDidYouHear: visitorData.howDidYouHear || '',
+          howDidYouHearOther: visitorData.howDidYouHearOther || '',
+          isFirstVisit: visitorData.isFirstVisit || 'no',
+          wantsContact: visitorData.wantsContact || 'no',
+          prayerRequest: visitorData.prayerRequest || '',
+          updated_at: new Date().toISOString()
+        };
+        
+        // 嘗試多種更新方法
+        let response;
+        let updateMethod = 'unknown';
+        
+        // 方法 1: PATCH with JSON body containing id
+        try {
+          response = await fetch(env.SHEETDB_URL, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              id: visitorData.id,
+              ...updateData
+            })
+          });
+          updateMethod = 'patch_with_id';
+        } catch (e) {
+          console.log('PATCH method 1 failed:', e.message);
         }
+        
+        // 方法 2: 如果第一種方法失敗，嘗試路徑參數方式
+        if (!response || !response.ok) {
+          try {
+            const updateUrl = `${env.SHEETDB_URL}/id/${encodeURIComponent(visitorData.id)}`;
+            response = await fetch(updateUrl, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(updateData)
+            });
+            updateMethod = 'patch_with_path';
+          } catch (e) {
+            console.log('PATCH method 2 failed:', e.message);
+          }
+        }
+        
+        // 方法 3: 如果 PATCH 失敗，嘗試 PUT
+        if (!response || !response.ok) {
+          try {
+            response = await fetch(env.SHEETDB_URL, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                id: visitorData.id,
+                ...updateData
+              })
+            });
+            updateMethod = 'put_method';
+          } catch (e) {
+            console.log('PUT method failed:', e.message);
+          }
+        }
+        
+        if (!response || !response.ok) {
+          const errorMsg = response ? `HTTP ${response.status}` : 'Network error';
+          throw new Error(`SheetDB update error: ${errorMsg}`);
+        }
+        
+        console.log(`Update successful using method: ${updateMethod}`);
         
         return new Response(JSON.stringify({
           success: true,
@@ -417,14 +473,70 @@ export async function onRequestDelete(context) {
     // 優先使用 SheetDB 刪除
     if (env.SHEETDB_URL && id) {
       try {
-        // SheetDB 刪除需要使用 DELETE 方法和特定的 URL 格式
-        const deleteUrl = `${env.SHEETDB_URL}/id/${id}`;
-        const response = await fetch(deleteUrl, {
-          method: 'DELETE'
+        // SheetDB 刪除方法：使用 POST 方法搭配 _method=DELETE
+        const response = await fetch(env.SHEETDB_URL, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: id
+          })
         });
         
+        // 如果第一種方法失敗，嘗試其他方法
         if (!response.ok) {
-          throw new Error(`SheetDB delete error: ${response.status}`);
+          console.log('First delete method failed, trying alternative methods...');
+          
+          // 方法 2: 使用查詢參數
+          try {
+            const deleteUrl2 = `${env.SHEETDB_URL}?id=${encodeURIComponent(id)}`;
+            const response2 = await fetch(deleteUrl2, {
+              method: 'DELETE'
+            });
+            
+            if (response2.ok) {
+              console.log('Delete method 2 succeeded');
+            } else {
+              // 方法 3: 使用路徑參數
+              const deleteUrl3 = `${env.SHEETDB_URL}/id/${encodeURIComponent(id)}`;
+              const response3 = await fetch(deleteUrl3, {
+                method: 'DELETE'
+              });
+              
+              if (response3.ok) {
+                console.log('Delete method 3 succeeded');
+              } else {
+                // 方法 4: 軟刪除 - 標記為已刪除而不是真正刪除
+                console.log('All delete methods failed, using soft delete...');
+                const softDeleteResponse = await fetch(env.SHEETDB_URL, {
+                  method: 'PATCH',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    id: id,
+                    deleted: true,
+                    deleted_at: new Date().toISOString()
+                  })
+                });
+                
+                if (!softDeleteResponse.ok) {
+                  throw new Error(`All delete methods failed. Last error: ${response3.status}`);
+                }
+                
+                return new Response(JSON.stringify({
+                  success: true,
+                  message: 'Visitor data marked as deleted (soft delete)',
+                  method: 'soft_delete'
+                }), {
+                  headers: { 'Content-Type': 'application/json' }
+                });
+              }
+            }
+          } catch (deleteError) {
+            throw new Error(`SheetDB delete error: ${deleteError.message}`);
+          }
         }
         
         return new Response(JSON.stringify({

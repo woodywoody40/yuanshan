@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理者 CRUD 完整測試</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; }
+        button { margin: 5px; padding: 10px 15px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; border: none; border-radius: 3px; }
+        .btn-danger { background: #dc3545; color: white; border: none; border-radius: 3px; }
+        .btn-success { background: #28a745; color: white; border: none; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 管理者 CRUD 完整測試</h1>
+    
+    <div id="results"></div>
+    
+    <div class="test-section">
+        <h3>測試控制</h3>
+        <button class="btn-primary" onclick="runFullCRUDTest()">執行完整 CRUD 測試</button>
+        <button class="btn-success" onclick="testCreate()">測試新增 (C)</button>
+        <button class="btn-primary" onclick="testRead()">測試讀取 (R)</button>
+        <button class="btn-primary" onclick="testUpdate()">測試更新 (U)</button>
+        <button class="btn-danger" onclick="testDelete()">測試刪除 (D)</button>
+        <button onclick="clearResults()">清除結果</button>
+    </div>
+    
+    <script>
+        let testRecordId = null;
+        let allVisitors = [];
+        
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            results.innerHTML += `<p class="${className}">${message}</p>`;
+            console.log(message);
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        async function login() {
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: 'Woody' })
+                });
+                
+                if (response.ok) {
+                    log('✅ 管理員登入成功', 'success');
+                    return true;
+                } else {
+                    log('❌ 管理員登入失敗', 'error');
+                    return false;
+                }
+            } catch (error) {
+                log(`❌ 登入錯誤: ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        async function testCreate() {
+            log('<h3>🆕 測試新增功能 (CREATE)</h3>');
+            
+            if (!await login()) return;
+            
+            testRecordId = new Date().toISOString() + '_test';
+            const testData = {
+                id: testRecordId,
+                name: 'CRUD 測試用戶',
+                email: 'crud.test@example.com',
+                phone: '0900123456',
+                howDidYouHear: 'friend_family',
+                howDidYouHearOther: '',
+                isFirstVisit: 'yes',
+                wantsContact: 'yes',
+                prayerRequest: 'CRUD 測試代禱事項'
+            };
+            
+            try {
+                const response = await fetch('/api/visitors', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData),
+                    credentials: 'include'
+                });
+                
+                const result = await response.text();
+                
+                if (response.ok) {
+                    log('✅ 新增功能正常', 'success');
+                    log(`回應: ${result}`);
+                } else {
+                    log('❌ 新增功能失敗', 'error');
+                    log(`錯誤: ${result}`);
+                }
+            } catch (error) {
+                log(`❌ 新增錯誤: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testRead() {
+            log('<h3>📖 測試讀取功能 (READ)</h3>');
+            
+            if (!await login()) return;
+            
+            try {
+                const response = await fetch('/api/visitors', {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    allVisitors = await response.json();
+                    log(`✅ 讀取功能正常，共 ${allVisitors.length} 筆記錄`, 'success');
+                    
+                    if (allVisitors.length > 0) {
+                        log('前 3 筆記錄:');
+                        allVisitors.slice(0, 3).forEach((visitor, index) => {
+                            log(`${index + 1}. ${visitor.name} (ID: ${visitor.id || '無ID'})`);
+                        });
+                    }
+                } else {
+                    const errorText = await response.text();
+                    log('❌ 讀取功能失敗', 'error');
+                    log(`錯誤: ${errorText}`);
+                }
+            } catch (error) {
+                log(`❌ 讀取錯誤: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testUpdate() {
+            log('<h3>✏️ 測試更新功能 (UPDATE)</h3>');
+            
+            if (!await login()) return;
+            
+            // 如果沒有測試記錄，先獲取一個現有記錄
+            if (!testRecordId && allVisitors.length === 0) {
+                await testRead();
+            }
+            
+            let targetRecord = null;
+            if (testRecordId) {
+                targetRecord = allVisitors.find(v => v.id === testRecordId);
+            }
+            
+            if (!targetRecord && allVisitors.length > 0) {
+                targetRecord = allVisitors.find(v => v.id && v.id !== '');
+            }
+            
+            if (!targetRecord) {
+                log('❌ 沒有找到可更新的記錄', 'error');
+                return;
+            }
+            
+            const updateData = {
+                ...targetRecord,
+                name: targetRecord.name + ' (已更新)',
+                email: 'updated@example.com',
+                prayerRequest: '更新後的代禱事項 - ' + new Date().toLocaleTimeString()
+            };
+            
+            try {
+                const response = await fetch('/api/visitors', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData),
+                    credentials: 'include'
+                });
+                
+                const result = await response.text();
+                
+                if (response.ok) {
+                    log(`✅ 更新功能正常 (記錄 ID: ${targetRecord.id})`, 'success');
+                    log(`回應: ${result}`);
+                } else {
+                    log('❌ 更新功能失敗', 'error');
+                    log(`錯誤: ${result}`);
+                }
+            } catch (error) {
+                log(`❌ 更新錯誤: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testDelete() {
+            log('<h3>🗑️ 測試刪除功能 (DELETE)</h3>');
+            
+            if (!await login()) return;
+            
+            // 如果沒有記錄，先獲取
+            if (allVisitors.length === 0) {
+                await testRead();
+            }
+            
+            // 找一個測試記錄來刪除
+            let targetRecord = null;
+            if (testRecordId) {
+                targetRecord = allVisitors.find(v => v.id === testRecordId);
+            }
+            
+            // 如果沒有測試記錄，找一個名稱包含"測試"的記錄
+            if (!targetRecord) {
+                targetRecord = allVisitors.find(v => v.id && v.id !== '' && v.name && v.name.includes('測試'));
+            }
+            
+            if (!targetRecord) {
+                log('❌ 沒有找到可刪除的測試記錄', 'error');
+                log('建議：先執行新增測試創建測試記錄');
+                return;
+            }
+            
+            if (!confirm(`確定要刪除記錄「${targetRecord.name}」嗎？`)) {
+                log('取消刪除測試');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/visitors?id=${encodeURIComponent(targetRecord.id)}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                
+                const result = await response.text();
+                
+                if (response.ok) {
+                    log(`✅ 刪除功能正常 (記錄 ID: ${targetRecord.id})`, 'success');
+                    log(`回應: ${result}`);
+                    
+                    // 檢查是否為軟刪除
+                    try {
+                        const resultObj = JSON.parse(result);
+                        if (resultObj.method === 'soft_delete') {
+                            log('ℹ️ 使用軟刪除方式（標記為已刪除）', 'info');
+                        }
+                    } catch (e) {}
+                } else {
+                    log('❌ 刪除功能失敗', 'error');
+                    log(`錯誤: ${result}`);
+                }
+            } catch (error) {
+                log(`❌ 刪除錯誤: ${error.message}`, 'error');
+            }
+        }
+        
+        async function runFullCRUDTest() {
+            clearResults();
+            log('<h2>🚀 開始完整 CRUD 測試</h2>');
+            log('測試順序：登入 → 新增 → 讀取 → 更新 → 刪除');
+            log('---');
+            
+            await testCreate();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testRead();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testUpdate();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testDelete();
+            
+            log('---');
+            log('<h3>🎉 CRUD 測試完成！</h3>');
+            log('請檢查上述結果，確保所有操作都顯示 ✅');
+        }
+    </script>
+    
+    <div class="test-section">
+        <h3>📋 測試說明</h3>
+        <ul>
+            <li><strong>新增 (CREATE):</strong> 創建一筆測試記錄</li>
+            <li><strong>讀取 (READ):</strong> 獲取所有訪客記錄</li>
+            <li><strong>更新 (UPDATE):</strong> 修改測試記錄的內容</li>
+            <li><strong>刪除 (DELETE):</strong> 刪除測試記錄（可能是軟刪除）</li>
+        </ul>
+        
+        <h4>預期結果</h4>
+        <p>所有操作都應該顯示 ✅ 成功標記。如果有 ❌ 錯誤，請檢查：</p>
+        <ul>
+            <li>管理員密碼是否正確</li>
+            <li>SheetDB URL 是否設定正確</li>
+            <li>Google Sheets 權限是否正確</li>
+            <li>網路連接是否正常</li>
+        </ul>
+    </div>
+</body>
+</html>
