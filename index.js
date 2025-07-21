@@ -27,6 +27,9 @@ const showAlert = (elementId, message, type = 'error') => {
             case 'warning':
                 el.classList.add('bg-yellow-50', 'border-yellow-400', 'text-yellow-700');
                 break;
+            case 'info':
+                el.classList.add('bg-blue-50', 'border-blue-400', 'text-blue-700');
+                break;
             default: // error
                 el.classList.add('bg-red-50', 'border-red-400', 'text-red-700');
         }
@@ -433,63 +436,62 @@ function initDashboardPage() {
                 button.textContent = '刪除中...';
                 
                 try {
-                    // 立即從 UI 中移除記錄（樂觀更新）
-                    const row = button.closest('tr');
-                    if (row) {
-                        row.style.opacity = '0.5';
-                        row.style.transition = 'opacity 0.3s ease';
-                    }
-                    
-                    const result = await deleteVisitorFromDB(id);
+                    // 立即從本地數據中移除記錄（樂觀更新）
+                    console.log('開始刪除記錄:', visitor.name, 'ID:', id);
                     
                     // 立即更新本地數據
                     allVisitors = allVisitors.filter(v => v.id !== id);
-                    
-                    // 檢查刪除結果類型並顯示訊息
-                    let message = '✅ 記錄已成功刪除';
-                    if (result && result.method) {
-                        switch (result.method) {
-                            case 'hard_delete':
-                                message = '✅ 記錄已成功刪除';
-                                break;
-                            case 'soft_delete':
-                                message = '✅ 記錄已標記為刪除';
-                                break;
-                            case 'simulated_delete':
-                                message = '⚠️ 刪除操作已記錄，請手動從 Google Sheets 中移除此記錄';
-                                break;
-                        }
-                    }
+                    console.log('本地數據已更新，剩餘記錄數:', allVisitors.length);
                     
                     // 立即重新渲染列表
                     renderVisitorList();
+                    console.log('UI 已重新渲染');
                     
-                    // 顯示成功訊息
-                    showAlert('list-error', message, 'success');
+                    // 顯示刪除中訊息
+                    showAlert('list-error', '🗑️ 正在刪除記錄...', 'info');
                     
-                    // 3秒後自動隱藏訊息
-                    setTimeout(() => {
-                        hideAlert('list-error');
-                    }, 3000);
-                    
-                    // 延遲刷新以確保數據同步（但不阻塞 UI）
-                    setTimeout(async () => {
-                        try {
-                            await refreshVisitorList();
-                        } catch (e) {
-                            console.log('Background refresh failed:', e);
+                    // 在背景執行實際的刪除操作
+                    deleteVisitorFromDB(id).then(result => {
+                        console.log('刪除操作完成:', result);
+                        
+                        // 檢查刪除結果類型並顯示訊息
+                        let message = '✅ 記錄已成功刪除';
+                        if (result && result.method) {
+                            switch (result.method) {
+                                case 'hard_delete':
+                                    message = '✅ 記錄已成功刪除';
+                                    break;
+                                case 'soft_delete':
+                                    message = '✅ 記錄已標記為刪除';
+                                    break;
+                                case 'simulated_delete':
+                                    message = '⚠️ 刪除操作已記錄，請手動從 Google Sheets 中移除此記錄';
+                                    break;
+                            }
                         }
-                    }, 2000);
+                        
+                        // 顯示成功訊息
+                        showAlert('list-error', message, 'success');
+                        
+                        // 3秒後自動隱藏訊息
+                        setTimeout(() => {
+                            hideAlert('list-error');
+                        }, 3000);
+                        
+                    }).catch(err => {
+                        console.error('刪除操作失敗:', err);
+                        
+                        // 如果刪除失敗，恢復記錄到本地數據
+                        allVisitors.push(visitor);
+                        allVisitors.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+                        renderVisitorList();
+                        
+                        showAlert('list-error', `刪除失敗：${err.message}`);
+                    });
                     
                 } catch(err) {
-                    // 恢復 UI 狀態
-                    const row = button.closest('tr');
-                    if (row) {
-                        row.style.opacity = '1';
-                    }
-                    
+                    console.error('刪除操作異常:', err);
                     showAlert('list-error', `刪除失敗：${err.message}`);
-                    console.error(err);
                     button.disabled = false;
                     button.textContent = '刪除';
                 }
