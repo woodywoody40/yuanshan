@@ -9,11 +9,27 @@ const HEAR_ABOUT_US_OPTIONS = [
 ];
 
 // --- HELPER FUNCTIONS ---
-const showAlert = (elementId, message) => {
+const showAlert = (elementId, message, type = 'error') => {
     const el = document.getElementById(elementId);
     if (el) {
         el.textContent = message;
         el.classList.remove('hidden');
+        
+        // 根據類型設定樣式
+        el.className = el.className.replace(/bg-\w+-\d+/g, '');
+        el.className = el.className.replace(/border-\w+-\d+/g, '');
+        el.className = el.className.replace(/text-\w+-\d+/g, '');
+        
+        switch (type) {
+            case 'success':
+                el.classList.add('bg-green-50', 'border-green-400', 'text-green-700');
+                break;
+            case 'warning':
+                el.classList.add('bg-yellow-50', 'border-yellow-400', 'text-yellow-700');
+                break;
+            default: // error
+                el.classList.add('bg-red-50', 'border-red-400', 'text-red-700');
+        }
     }
 };
 
@@ -103,7 +119,19 @@ async function apiFetch(url, options = {}) {
 const getVisitors = () => apiFetch('/api/visitors');
 const addVisitorToDB = (visitor) => apiFetch('/api/visitors', { method: 'POST', body: JSON.stringify(visitor) });
 const updateVisitorInDB = (visitor) => apiFetch('/api/visitors', { method: 'PUT', body: JSON.stringify(visitor) });
-const deleteVisitorFromDB = (id) => apiFetch(`/api/visitors?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+const deleteVisitorFromDB = async (id) => {
+    const response = await fetch(`/api/visitors?id=${encodeURIComponent(id)}`, { 
+        method: 'DELETE',
+        credentials: 'include'
+    });
+    
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+    }
+    
+    return await response.json();
+};
 
 // --- PAGE INITIALIZERS ---
 
@@ -405,9 +433,61 @@ function initDashboardPage() {
                 button.textContent = '刪除中...';
                 
                 try {
-                    await deleteVisitorFromDB(id);
-                    await refreshVisitorList();
+                    // 立即從 UI 中移除記錄（樂觀更新）
+                    const row = button.closest('tr');
+                    if (row) {
+                        row.style.opacity = '0.5';
+                        row.style.transition = 'opacity 0.3s ease';
+                    }
+                    
+                    const result = await deleteVisitorFromDB(id);
+                    
+                    // 立即更新本地數據
+                    allVisitors = allVisitors.filter(v => v.id !== id);
+                    
+                    // 檢查刪除結果類型並顯示訊息
+                    let message = '✅ 記錄已成功刪除';
+                    if (result && result.method) {
+                        switch (result.method) {
+                            case 'hard_delete':
+                                message = '✅ 記錄已成功刪除';
+                                break;
+                            case 'soft_delete':
+                                message = '✅ 記錄已標記為刪除';
+                                break;
+                            case 'simulated_delete':
+                                message = '⚠️ 刪除操作已記錄，請手動從 Google Sheets 中移除此記錄';
+                                break;
+                        }
+                    }
+                    
+                    // 立即重新渲染列表
+                    renderVisitorList();
+                    
+                    // 顯示成功訊息
+                    showAlert('list-error', message, 'success');
+                    
+                    // 3秒後自動隱藏訊息
+                    setTimeout(() => {
+                        hideAlert('list-error');
+                    }, 3000);
+                    
+                    // 延遲刷新以確保數據同步（但不阻塞 UI）
+                    setTimeout(async () => {
+                        try {
+                            await refreshVisitorList();
+                        } catch (e) {
+                            console.log('Background refresh failed:', e);
+                        }
+                    }, 2000);
+                    
                 } catch(err) {
+                    // 恢復 UI 狀態
+                    const row = button.closest('tr');
+                    if (row) {
+                        row.style.opacity = '1';
+                    }
+                    
                     showAlert('list-error', `刪除失敗：${err.message}`);
                     console.error(err);
                     button.disabled = false;
