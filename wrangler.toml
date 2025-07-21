@@ -1,0 +1,13 @@
+name = "church-visitor-sign-in"
+compatibility_date = "2023-12-01"
+pages_build_output_dir = "."
+
+# D1 資料庫配置 (需要先創建資料庫後填入實際ID)
+# 暫時註解掉直到獲取真實的 database_id
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "church-visitors-db"
+# database_id = "your-database-id-here"
+
+# 環境變數 (在 Cloudflare Dashboard 中設定)
+# ADMIN_PASSWORD = "your-secure-password"

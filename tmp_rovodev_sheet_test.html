@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sheet 欄位測試</title>
+</head>
+<body>
+    <h1>📊 Sheet 欄位對應測試</h1>
+    
+    <div id="results"></div>
+    
+    <button onclick="testWithCorrectFields()">測試正確欄位格式</button>
+    
+    <script>
+        async function testWithCorrectFields() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>測試中...</p>';
+            
+            try {
+                // 先登入
+                await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: 'Woody' })
+                });
+                
+                // 使用與 Sheet 欄位完全對應的格式
+                const response = await fetch('/api/visitors', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: 'Sheet Test User',
+                        phone: '0912345678',
+                        email: 'test@example.com',
+                        howDidYouHear: 'friend_family',
+                        howDidYouHearOther: '',
+                        isFirstVisit: 'yes',
+                        wantsContact: 'no',
+                        prayerRequest: 'Test prayer request'
+                    }),
+                    credentials: 'include'
+                });
+                
+                const data = await response.text();
+                
+                results.innerHTML = `
+                    <h3>測試結果</h3>
+                    <p><strong>狀態:</strong> ${response.status}</p>
+                    <p><strong>回應:</strong></p>
+                    <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px;">${data}</pre>
+                `;
+                
+                if (response.status === 500) {
+                    results.innerHTML += `
+                        <div style="background: #ffe6e6; padding: 15px; border-radius: 5px; margin-top: 10px;">
+                            <h4>🚨 仍然是 404 錯誤？請檢查：</h4>
+                            <ol>
+                                <li><strong>SheetDB URL 格式：</strong><br>
+                                    應該是：<code>https://sheetdb.io/api/v1/YOUR_SHEET_ID</code>
+                                </li>
+                                <li><strong>Google Sheet 權限：</strong><br>
+                                    確保設定為「知道連結的任何人都可以檢視」
+                                </li>
+                                <li><strong>手動測試：</strong><br>
+                                    在瀏覽器中直接訪問您的 SheetDB URL
+                                </li>
+                            </ol>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                results.innerHTML = `<p style="color: red;">錯誤: ${error.message}</p>`;
+            }
+        }
+    </script>
+    
+    <hr>
+    <h2>📋 您的 Sheet 欄位</h2>
+    <p>✅ 您的 Google Sheet 欄位標題正確：</p>
+    <pre style="background: #e8f5e8; padding: 10px; border-radius: 5px;">
+id | name | phone | email | howDidYouHear | howDidYouHearOther | isFirstVisit | wantsContact | prayerRequest
+    </pre>
+    
+    <h3>🔧 下一步檢查</h3>
+    <ol>
+        <li><strong>確認 SheetDB URL：</strong> 在 Cloudflare Pages 環境變數中檢查格式</li>
+        <li><strong>測試 URL：</strong> 在瀏覽器中直接訪問您的 SheetDB URL</li>
+        <li><strong>檢查權限：</strong> 確保 Google Sheet 是公開可讀取的</li>
+    </ol>
+</body>
+</html>

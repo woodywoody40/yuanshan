@@ -1,0 +1,422 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>教會電子留名卡</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @font-face {
+            font-family: 'ChenYuluoyan';
+            src: url('./fonts/ChenYuluoyan-2.0-Thin.ttf') format('truetype');
+            font-weight: 100;
+            font-style: normal;
+            font-display: swap;
+        }
+        
+        :root {
+            --color-bg: #F8F7F4;
+            --color-surface: #ffffff;
+            --color-primary: #8E9B8D; /* Sage Green */
+            --color-primary-dark: #707C6F;
+            --color-secondary: #EAE6DD;
+            --color-secondary-dark: #DCD8D0;
+            --color-text-heading: #3D403D;
+            --color-text-body: #5A5A5A;
+            --color-text-muted: #9ca3af;
+            --color-border: #E5E7EB;
+            --font-serif: 'ChenYuluoyan', 'Lora', serif;
+            --font-sans: 'ChenYuluoyan', 'Noto Sans TC', sans-serif;
+            --font-display: 'ChenYuluoyan', serif;
+        }
+        body { 
+            font-family: var(--font-sans); 
+            background-color: var(--color-bg); 
+            color: var(--color-text-body);
+            font-weight: 100;
+            font-size: 18px; /* 基礎字體從16px調整到18px */
+        }
+        h1, h2, h3 { 
+            font-family: var(--font-display); 
+            color: var(--color-text-heading); 
+            font-weight: 100;
+            letter-spacing: 0.02em;
+        }
+        h1 { font-size: 2.5rem; } /* 增大標題 */
+        h2 { font-size: 2rem; }
+        h3 { font-size: 1.5rem; }
+        .welcome-title {
+            font-family: var(--font-display);
+            font-weight: 100;
+            letter-spacing: 0.05em;
+        }
+        .form-label { 
+            font-size: 16px; /* 表單標籤字體 */
+            font-weight: 100;
+        }
+        .btn {
+            font-size: 16px; /* 按鈕字體 */
+        }
+        p, span, div {
+            font-size: 18px; /* 段落和一般文字 */
+        }
+
+        .animate-fade-in { animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-slide-in-up { animation: slideInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards; opacity: 0; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Enhanced form interactions */
+        .form-input { 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .form-input:focus { 
+            transform: translateY(-1px); 
+            box-shadow: 0 0 0 3px rgba(142, 155, 141, 0.2), 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .form-input:hover:not(:focus) { transform: translateY(-0.5px); }
+        
+        /* Enhanced radio buttons */
+        .custom-radio { 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .custom-radio:hover { transform: scale(1.1); }
+        .custom-radio:checked { animation: radioCheck 0.4s ease-out; }
+        @keyframes radioCheck { 
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Staggered animation for form fields */
+        .form-field { animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .form-field:nth-child(1) { animation-delay: 0.1s; }
+        .form-field:nth-child(2) { animation-delay: 0.2s; }
+        .form-field:nth-child(3) { animation-delay: 0.3s; }
+        .form-field:nth-child(4) { animation-delay: 0.4s; }
+        .form-field:nth-child(5) { animation-delay: 0.5s; }
+
+        .form-input, .form-select {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-body);
+            border-radius: 0.5rem;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(142, 155, 141, 0.2);
+        }
+        .form-select.appearance-none {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%239ca3af'%3e%3cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.25rem;
+        }
+        .form-label { color: var(--color-text-body); font-weight: 500; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            font-weight: 700;
+            border-radius: 0.5rem;
+            border: 1px solid transparent;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 10px 0 rgb(0 0 0 / 0.1); }
+        .btn:active:not(:disabled) { transform: translateY(0); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .btn-primary { color: white; background-color: var(--color-primary); }
+        .btn-primary:hover:not(:disabled) { background-color: var(--color-primary-dark); }
+        .btn-secondary { color: var(--color-text-heading); background-color: var(--color-secondary); }
+        .btn-secondary:hover:not(:disabled) { background-color: var(--color-secondary-dark); }
+        
+        .custom-radio {
+            appearance: none; -webkit-appearance: none;
+            width: 1.25rem; height: 1.25rem;
+            border: 2px solid var(--color-border);
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .custom-radio:checked { border-color: var(--color-primary); background-color: var(--color-primary); }
+        .custom-radio:checked::before {
+            content: ''; display: block;
+            width: 0.5rem; height: 0.5rem;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .custom-radio:focus-visible { box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-primary); outline: none; }
+    </style>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-[var(--color-bg)]">
+    <div id="root" class="min-h-screen flex items-center justify-center p-4">
+        <main class="w-full max-w-5xl bg-[var(--color-surface)] rounded-2xl shadow-2xl flex flex-col lg:flex-row overflow-hidden animate-fade-in">
+            <!-- Left Decorative Panel -->
+            <div class="w-full lg:w-2/5 p-6 sm:p-8 lg:p-12 bg-cover bg-center flex flex-col justify-between" style="background-color: #e8e5de;">
+                <div>
+                    <h1 class="welcome-title text-4xl sm:text-5xl lg:text-6xl leading-tight text-[var(--color-text-heading)]">歡迎回家</h1>
+                    <p class="mt-4 text-[var(--color-text-body)] text-xl">我們很高興您能來到這裡。願您感受到溫暖與平安。</p>
+                </div>
+                <div class="text-right">
+                   <div class="relative">
+                       <svg class="w-24 h-24 text-[var(--color-primary)] inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1m1.5.5l-1.5-.5M6.75 7.364V3h-3v18m3-13.636l10.5-3.819" />
+                       </svg>
+                       <!-- Decorative elements -->
+                       <div class="absolute -top-2 -right-2 w-6 h-6 bg-[var(--color-primary)] rounded-full opacity-20 animate-pulse"></div>
+                       <div class="absolute -bottom-1 -left-1 w-4 h-4 bg-[var(--color-secondary)] rounded-full"></div>
+                   </div>
+                </div>
+            </div>
+
+            <!-- Right Form Panel -->
+            <div id="form-view" class="w-full lg:w-3/5 p-6 sm:p-10 space-y-6 relative">
+                 <div class="absolute top-4 right-4">
+                    <button id="go-to-admin-btn-1" class="btn btn-secondary !p-3 !rounded-full hover:scale-110 hover:rotate-12 transition-all duration-300 group" aria-label="管理留名紀錄" title="管理留名紀錄">
+                        <svg class="w-5 h-5 group-hover:scale-110 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="text-left mb-8">
+                    <h2 class="text-3xl sm:text-4xl font-bold">訪客留名</h2>
+                    <p class="text-[var(--color-text-body)] mt-2 text-lg">請填寫留名卡，讓我們能更好地認識您。</p>
+                    
+                    <!-- 進度指示器 -->
+                    <div class="mt-4 flex items-center space-x-2">
+                        <div class="flex items-center space-x-1">
+                            <div class="w-2 h-2 bg-[var(--color-primary)] rounded-full animate-pulse"></div>
+                            <span class="text-xs text-[var(--color-text-body)]">填寫中</span>
+                        </div>
+                        <div class="flex-1 h-1 bg-[var(--color-secondary)] rounded-full overflow-hidden">
+                            <div id="progress-bar" class="h-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-dark)] rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                        </div>
+                        <span class="text-xs text-[var(--color-text-body)]" id="progress-text">0%</span>
+                    </div>
+                </div>
+
+                <div id="db-config-error" class="bg-red-50 border-l-4 border-red-400 text-red-700 p-3 rounded-md text-sm hidden" role="alert">
+                    <strong>設定錯誤：</strong>無法連接到資料庫。請管理員檢查 API 設定。表單已停用。
+                </div>
+                <div id="form-error" class="bg-red-50 border-l-4 border-red-400 text-red-700 p-3 rounded-md text-sm hidden" role="alert"></div>
+
+                <form id="main-form" class="space-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="form-field">
+                            <label for="name" class="block text-sm form-label mb-1">姓名 <span class="text-red-500">*</span></label>
+                            <input type="text" id="name" name="name" required class="form-input w-full p-2.5">
+                        </div>
+                        <div>
+                            <label for="phone" class="block text-sm form-label mb-1">電話</label>
+                            <input type="tel" id="phone" name="phone" class="form-input w-full p-2.5">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="email" class="block text-sm form-label mb-1">電子郵件</label>
+                        <input type="email" id="email" name="email" class="form-input w-full p-2.5">
+                    </div>
+
+                    <div class="relative z-10">
+                        <label for="howDidYouHear" class="block text-sm form-label mb-1">如何得知本教會？</label>
+                        <select id="howDidYouHear" name="howDidYouHear" class="form-select appearance-none w-full p-2.5 pr-10"></select>
+                        <input type="text" id="howDidYouHearOther" name="howDidYouHearOther" placeholder="請說明" class="form-input w-full mt-2 p-2.5 hidden">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <fieldset>
+                            <legend class="block text-sm form-label mb-2">是否初次到訪？</legend>
+                            <div class="flex items-center space-x-6">
+                                <label for="isFirstVisit_yes" class="flex items-center cursor-pointer">
+                                    <input id="isFirstVisit_yes" name="isFirstVisit" type="radio" value="yes" checked class="custom-radio">
+                                    <span class="ml-2 block text-sm">是</span>
+                                </label>
+                                <label for="isFirstVisit_no" class="flex items-center cursor-pointer">
+                                    <input id="isFirstVisit_no" name="isFirstVisit" type="radio" value="no" class="custom-radio">
+                                    <span class="ml-2 block text-sm">否</span>
+                                </label>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <legend class="block text-sm form-label mb-2">是否希望聯絡？</legend>
+                            <div class="flex items-center space-x-6">
+                                <label for="wantsContact_yes" class="flex items-center cursor-pointer">
+                                    <input id="wantsContact_yes" name="wantsContact" type="radio" value="yes" class="custom-radio">
+                                    <span class="ml-2 block text-sm">是</span>
+                                </label>
+                                <label for="wantsContact_no" class="flex items-center cursor-pointer">
+                                    <input id="wantsContact_no" name="wantsContact" type="radio" value="no" checked class="custom-radio">
+                                    <span class="ml-2 block text-sm">否</span>
+                                </label>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="prayerRequest" class="block text-sm form-label mb-1">代禱事項 / 留言</label>
+                        <textarea id="prayerRequest" name="prayerRequest" rows="3" class="form-input w-full p-2.5"></textarea>
+                    </div>
+
+                    <div class="pt-2 form-field">
+                        <button type="submit" id="submit-main-form" class="w-full btn btn-primary group">
+                            <span class="btn-text flex items-center justify-center">
+                                <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span class="group-hover:scale-105 transition-transform duration-300">提交留名</span>
+                            </span>
+                            <span class="btn-loader hidden">
+                               <svg class="animate-spin inline-block w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                <span>處理中...</span>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+    <script type="module" src="index.js"></script>
+<script type="module" src="/index.tsx"></script>
+<script>
+// 表單進度追蹤
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('main-form');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
+    const allFields = form.querySelectorAll('input, select, textarea');
+    
+    function updateProgress() {
+        let filledFields = 0;
+        allFields.forEach(field => {
+            if (field.value.trim() !== '') {
+                filledFields++;
+            }
+        });
+        
+        const progress = Math.round((filledFields / allFields.length) * 100);
+        progressBar.style.width = progress + '%';
+        progressText.textContent = progress + '%';
+        
+        // 添加完成動畫
+        if (progress === 100) {
+            progressBar.style.background = 'linear-gradient(90deg, #10B981, #059669)';
+            progressText.textContent = '完成！';
+        }
+    }
+    
+    // 監聽所有表單字段變化
+    allFields.forEach(field => {
+        field.addEventListener('input', updateProgress);
+        field.addEventListener('change', updateProgress);
+    });
+    
+    // 初始化進度
+    updateProgress();
+    
+    // 表單字段焦點效果
+    allFields.forEach(field => {
+        field.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.02)';
+        });
+        
+        field.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+    });
+});
+
+// 自動保存功能
+let autoSaveTimer;
+function autoSave() {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => {
+        const formData = new FormData(document.getElementById('main-form'));
+        const data = Object.fromEntries(formData);
+        localStorage.setItem('visitor-form-draft', JSON.stringify(data));
+        
+        // 顯示保存提示
+        showNotification('草稿已自動保存', 'info');
+    }, 2000);
+}
+
+// 恢復草稿
+function restoreDraft() {
+    const draft = localStorage.getItem('visitor-form-draft');
+    if (draft) {
+        const data = JSON.parse(draft);
+        Object.keys(data).forEach(key => {
+            const field = document.querySelector(`[name="${key}"]`);
+            if (field && data[key]) {
+                field.value = data[key];
+                if (field.type === 'radio' && field.value === data[key]) {
+                    field.checked = true;
+                }
+            }
+        });
+        showNotification('已恢復之前的草稿', 'success');
+    }
+}
+
+// 通知系統
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 p-3 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-full`;
+    
+    const colors = {
+        info: 'bg-blue-500 text-white',
+        success: 'bg-green-500 text-white',
+        warning: 'bg-yellow-500 text-black',
+        error: 'bg-red-500 text-white'
+    };
+    
+    notification.className += ` ${colors[type]}`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // 動畫進入
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // 自動移除
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+// 頁面載入時恢復草稿
+document.addEventListener('DOMContentLoaded', restoreDraft);
+
+// 監聽表單變化進行自動保存
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('main-form');
+    if (form) {
+        form.addEventListener('input', autoSave);
+        form.addEventListener('change', autoSave);
+    }
+});
+</script>
+</body>
+</html>

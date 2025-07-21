@@ -1,0 +1,272 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>提交成功 - 教會電子留名卡</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @font-face {
+            font-family: 'ChenYuluoyan';
+            src: url('./fonts/ChenYuluoyan-2.0-Thin.ttf') format('truetype');
+            font-weight: 100;
+            font-style: normal;
+            font-display: swap;
+        }
+        
+        :root {
+            --color-bg: #F8F7F4;
+            --color-surface: #ffffff;
+            --color-primary: #8E9B8D; /* Sage Green */
+            --color-primary-dark: #707C6F;
+            --color-secondary: #EAE6DD;
+            --color-secondary-dark: #DCD8D0;
+            --color-text-heading: #3D403D;
+            --color-text-body: #5A5A5A;
+            --color-text-muted: #9ca3af;
+            --color-border: #E5E7EB;
+            --font-serif: 'ChenYuluoyan', 'Lora', serif;
+            --font-sans: 'ChenYuluoyan', 'Noto Sans TC', sans-serif;
+            --font-display: 'ChenYuluoyan', serif;
+        }
+        body { 
+            font-family: var(--font-sans); 
+            background-color: var(--color-bg); 
+            color: var(--color-text-body);
+            font-weight: 100;
+            font-size: 18px;
+        }
+        h1, h2, h3 { 
+            font-family: var(--font-display); 
+            color: var(--color-text-heading); 
+            font-weight: 100;
+            letter-spacing: 0.02em;
+        }
+        h1 { font-size: 2.5rem; }
+        h2 { font-size: 2rem; }
+        h3 { font-size: 1.5rem; }
+        .btn {
+            font-size: 16px;
+        }
+        p, span, div {
+            font-size: 18px;
+        }
+
+        .animate-fade-in { animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-slide-in-up { animation: slideInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards; opacity: 0; }
+        .check-path { stroke-dasharray: 48; stroke-dashoffset: 48; animation: check-draw 0.8s 0.2s ease-in-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes check-draw { to { stroke-dashoffset: 0; } }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            font-weight: 700;
+            border-radius: 0.5rem;
+            border: 1px solid transparent;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 10px 0 rgb(0 0 0 / 0.1); }
+        .btn:active:not(:disabled) { transform: translateY(0); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .btn-primary { color: white; background-color: var(--color-primary); }
+        .btn-primary:hover:not(:disabled) { background-color: var(--color-primary-dark); }
+        .btn-secondary { color: var(--color-text-heading); background-color: var(--color-secondary); }
+        .btn-secondary:hover:not(:disabled) { background-color: var(--color-secondary-dark); }
+    </style>
+</head>
+<body class="bg-[var(--color-bg)]">
+    <div id="root" class="min-h-screen flex items-center justify-center p-4">
+        <div id="success-view" class="w-full max-w-lg bg-[var(--color-surface)] rounded-2xl shadow-2xl p-6 sm:p-12 text-center animate-fade-in">
+            <div class="relative mx-auto mb-6">
+                <svg class="w-20 h-20 text-[var(--color-primary)] mx-auto" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="26" cy="26" r="25" stroke="currentColor" stroke-width="2" class="opacity-20"/>
+                  <path d="M14 27l8 8 16-16" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="check-path"/>
+                </svg>
+                <!-- Decorative elements -->
+                <div class="absolute -top-1 -right-1 w-6 h-6 bg-[var(--color-primary)] rounded-full opacity-20 animate-ping"></div>
+                <div class="absolute -bottom-2 -left-2 w-4 h-4 bg-[var(--color-secondary)] rounded-full"></div>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-bold text-[var(--color-text-heading)] mb-2">提交成功！</h1>
+            <p class="text-[var(--color-text-body)] mb-6 text-xl">願上帝祝福您有美好的一天。</p>
+            
+            <!-- 訪客統計 - 莫蘭迪色系 -->
+            <div class="bg-gradient-to-br from-[#D4C5B9] to-[#C8B5A6] rounded-lg p-6 mb-6 animate-slide-in-up shadow-lg border border-[var(--color-border)]">
+                <div class="flex items-center justify-center space-x-8 text-base">
+                    <div class="text-center">
+                        <div class="flex items-center justify-center mb-2">
+                            <div class="w-8 h-8 bg-[var(--color-primary)] bg-opacity-20 rounded-full flex items-center justify-center mr-2">
+                                <svg class="w-4 h-4 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <span class="font-bold text-[var(--color-text-heading)] text-xl" id="today-count">今日第 - 位</span>
+                        </div>
+                        <span class="text-[var(--color-text-body)] text-sm">訪客</span>
+                    </div>
+                    <div class="w-px h-12 bg-[var(--color-border)]"></div>
+                    <div class="text-center">
+                        <div class="flex items-center justify-center mb-2">
+                            <div class="w-8 h-8 bg-[var(--color-primary)] bg-opacity-20 rounded-full flex items-center justify-center mr-2">
+                                <svg class="w-4 h-4 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                                </svg>
+                            </div>
+                            <span class="font-bold text-[var(--color-text-heading)] text-xl" id="total-count">總計 - 位</span>
+                        </div>
+                        <span class="text-[var(--color-text-body)] text-sm">訪客</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-[var(--color-bg)] rounded-lg p-6 text-left animate-slide-in-up">
+                <p id="welcome-message" class="text-[var(--color-text-body)] whitespace-pre-wrap leading-relaxed text-lg" style="font-family: var(--font-display); font-weight: 100; letter-spacing: 0.02em;"></p>
+            </div>
+            
+            <!-- 快速操作提示 -->
+            <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg animate-slide-in-up">
+                <div class="flex items-start space-x-3">
+                    <svg class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    <div class="text-base">
+                        <p class="font-medium text-blue-800 mb-1 text-lg">小提示</p>
+                        <p class="text-blue-700">如果還有其他家人或朋友需要填寫，可以點擊「填寫下一位」繼續。管理員可以透過「管理紀錄」查看所有訪客資料。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 flex flex-col sm:flex-row gap-4">
+                 <button id="add-another-btn" class="w-full btn btn-primary group">
+                    <svg class="w-5 h-5 mr-2 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                    </svg>
+                    <span class="group-hover:scale-105 transition-transform duration-300">填寫下一位</span>
+                </button>
+                <button id="go-to-admin-btn-2" class="w-full btn btn-secondary group">
+                    <svg class="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
+                    </svg>
+                    <span class="group-hover:scale-105 transition-transform duration-300">管理紀錄</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="index.js"></script>
+<script>
+// 模擬訪客統計數據
+document.addEventListener('DOMContentLoaded', function() {
+    // 獲取實際統計數據
+    function updateStats() {
+        fetch('/api/visitor-stats')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.warn('訪客統計API錯誤:', data.error);
+                    document.getElementById('today-count').textContent = `今日第 ${data.todayPosition || 1} 位`;
+                    document.getElementById('total-count').textContent = `總計 ${data.totalCount || 0} 位`;
+                } else {
+                    // 添加數字動畫效果
+                    animateNumber('today-count', data.todayPosition || 1);
+                    animateNumber('total-count', data.totalCount || 0);
+                }
+                
+                if (data.message) {
+                    console.info('訪客統計API訊息:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('獲取訪客統計失敗:', error);
+                // API失敗時顯示預設值
+                document.getElementById('today-count').textContent = '今日第 1 位';
+                document.getElementById('total-count').textContent = '總計 0 位';
+            });
+    }
+    
+    function animateNumber(elementId, targetNumber) {
+        const element = document.getElementById(elementId);
+        const isToday = elementId.includes('today');
+        let current = 0;
+        const increment = Math.ceil(targetNumber / 20);
+        
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= targetNumber) {
+                current = targetNumber;
+                clearInterval(timer);
+            }
+            
+            if (isToday) {
+                element.textContent = `今日第 ${current} 位`;
+            } else {
+                element.textContent = `總計 ${current} 位`;
+            }
+        }, 50);
+    }
+    
+    // 延遲顯示統計數據，增加懸念
+    setTimeout(updateStats, 1000);
+    
+    // 清除草稿（因為已成功提交）
+    localStorage.removeItem('visitor-form-draft');
+    
+    // 添加慶祝動畫
+    setTimeout(() => {
+        createConfetti();
+    }, 500);
+});
+
+// 簡單的慶祝動畫
+function createConfetti() {
+    const colors = ['#8E9B8D', '#EAE6DD', '#3D403D', '#5A5A5A'];
+    
+    for (let i = 0; i < 30; i++) {
+        setTimeout(() => {
+            const confetti = document.createElement('div');
+            confetti.style.cssText = `
+                position: fixed;
+                top: -10px;
+                left: ${Math.random() * 100}%;
+                width: 8px;
+                height: 8px;
+                background: ${colors[Math.floor(Math.random() * colors.length)]};
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 1000;
+                animation: confetti-fall 3s linear forwards;
+            `;
+            
+            document.body.appendChild(confetti);
+            
+            setTimeout(() => {
+                document.body.removeChild(confetti);
+            }, 3000);
+        }, i * 100);
+    }
+}
+
+// 添加CSS動畫
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes confetti-fall {
+        to {
+            transform: translateY(100vh) rotate(360deg);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+</body>
+</html>
